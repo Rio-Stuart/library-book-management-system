@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Library Desk - Library Book Management & Fine Calculation System</title>
+    <link rel="stylesheet" href="/styles.css?v=2.1">
+    <script src="/app.js?v=2.1" defer></script>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <div class="brand-group">
+            <svg class="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                <path d="M6 6h10"/>
+                <path d="M6 10h10"/>
+                <path d="M6 14h7"/>
+            </svg>
+            <div>
+                <span class="brand">Library Desk</span>
+                <span class="subbrand">Chandigarh University Circulation Portal</span>
+            </div>
+        </div>
+        <nav aria-label="Main navigation">
+            <button type="button" data-view="dashboard" aria-current="page">
+                <span>Dashboard</span>
+            </button>
+            <button type="button" data-view="catalog">
+                <span>Catalog</span>
+                <span id="nav-books-count" class="pill-count"></span>
+            </button>
+            <button type="button" data-view="students">
+                <span>Students</span>
+                <span id="nav-students-count" class="pill-count"></span>
+            </button>
+            <button type="button" data-view="loans">
+                <span>Loans</span>
+                <span id="nav-loans-overdue" class="pill-count pill-warn" hidden></span>
+            </button>
+            <button type="button" data-view="reports">
+                <span>Reports</span>
+            </button>
+        </nav>
+        <div class="header-actions">
+            <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
+                <svg id="theme-sun" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+                <svg id="theme-moon" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <!-- 1. DASHBOARD VIEW -->
+    <section id="dashboard">
+        <div class="view-header">
+            <div>
+                <h1>Circulation Dashboard</h1>
+                <p class="policy">Overview of library inventory, borrower accounts, active loans, and overdue fines.</p>
+            </div>
+            <div class="quick-actions">
+                <button type="button" class="btn btn-primary" id="btn-quick-issue">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Issue Book</span>
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-quick-add-book">
+                    <span>Add Book</span>
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-quick-add-student">
+                    <span>Register Student</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-emerald">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Total Books</span>
+                    <strong class="stat-value" id="stat-total-books">-</strong>
+                    <span class="stat-meta" id="stat-books-meta">- available</span>
+                </div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Registered Students</span>
+                    <strong class="stat-value" id="stat-total-students">-</strong>
+                    <span class="stat-meta">Across 5 departments</span>
+                </div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-amber">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Active Loans</span>
+                    <strong class="stat-value" id="stat-active-loans">-</strong>
+                    <span class="stat-meta">Currently in circulation</span>
+                </div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-rose">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Overdue Loans</span>
+                    <strong class="stat-value stat-danger" id="stat-overdue-loans">-</strong>
+                    <span class="stat-meta">Pending return past 14 days</span>
+                </div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-indigo">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Fines Collected</span>
+                    <strong class="stat-value" id="stat-fines-collected">₹0.00</strong>
+                    <span class="stat-meta" id="stat-fines-pending">Pending: ₹0.00</span>
+                </div>
+            </article>
+        </div>
+
+        <div class="dashboard-columns">
+            <article class="panel">
+                <div class="panel-header">
+                    <h2>Recent Circulation Activity</h2>
+                    <button type="button" class="link-btn" id="btn-view-all-loans">View all loans &rarr;</button>
+                </div>
+                <div class="table-wrapper" tabindex="0" role="region" aria-label="Recent activity table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Book & Borrower</th>
+                                <th>Dates</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-recent-rows"></tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <h2>Most Borrowed Books</h2>
+                    <button type="button" class="link-btn" id="btn-view-catalog">Explore catalog &rarr;</button>
+                </div>
+                <div class="top-books-list" id="top-books-list"></div>
+            </article>
+        </div>
+    </section>
+
+    <!-- 2. CATALOG VIEW -->
+    <section id="catalog" hidden>
+        <div class="view-header">
+            <div>
+                <h1>Book Catalog</h1>
+                <p class="policy">Search, filter, manage inventory, and check shelf availability.</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" id="btn-open-add-book">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Add New Book</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="search-box">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input id="catalog-query" type="search" placeholder="Search by title, author, ID, category, or ISBN...">
+            </div>
+            <div class="filter-controls">
+                <select id="catalog-category-filter" aria-label="Filter by category">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="catalog-availability-filter" aria-label="Filter by availability">
+                    <option value="ALL">All Statuses</option>
+                    <option value="AVAILABLE">Available Only</option>
+                    <option value="ON_LOAN">On Loan Only</option>
+                </select>
+            </div>
+        </div>
+
+        <article class="panel">
+            <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="catalog-caption">
+                <table id="books-table">
+                    <caption id="catalog-caption" class="sr-only">Book Catalog Directory</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" data-type="text">
+                                <button type="button" class="th-sort" data-col="id">ID</button>
+                            </th>
+                            <th scope="col" data-type="text">
+                                <button type="button" class="th-sort" data-col="title">Title & Author</button>
+                            </th>
+                            <th scope="col" data-type="text">
+                                <button type="button" class="th-sort" data-col="category">Category</button>
+                            </th>
+                            <th scope="col" data-type="text">Shelf / Year</th>
+                            <th scope="col" data-type="text">
+                                <button type="button" class="th-sort" data-col="status">Status</button>
+                            </th>
+                            <th scope="col" class="th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="book-rows"></tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <!-- 3. STUDENTS VIEW -->
+    <section id="students" hidden>
+        <div class="view-header">
+            <div>
+                <h1>Registered Students</h1>
+                <p class="policy">Student borrowers, contact details, active loans, and borrowing history.</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" id="btn-open-register-student">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Register Student</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="search-box">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input id="student-query" type="search" placeholder="Search by student UID, name, email, or department...">
+            </div>
+        </div>
+
+        <article class="panel">
+            <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="students-caption">
+                <table id="students-table">
+                    <caption id="students-caption" class="sr-only">Registered Students Directory</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" data-type="text">
+                                <button type="button" class="th-sort" data-col="uid">Student UID</button>
+                            </th>
+                            <th scope="col" data-type="text">
+                                <button type="button" class="th-sort" data-col="name">Name</button>
+                            </th>
+                            <th scope="col" data-type="text">Department & Contact</th>
+                            <th scope="col" class="th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-rows"></tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <!-- 4. LOANS & CIRCULATION VIEW -->
+    <section id="loans" hidden>
+        <div class="view-header">
+            <div>
+                <h1>Circulation & Loans</h1>
+                <p class="policy">14-day loan period · ₹5.00 per overdue day · Max 2 renewals allowed per loan</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" id="btn-open-issue-dialog">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Issue a Book</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Student Profile banner when filtered to a specific student -->
+        <div id="student-history-banner" class="student-profile-card" hidden>
+            <div class="profile-avatar" id="profile-avatar">CU</div>
+            <div class="profile-info">
+                <h3 id="profile-name">Student Name</h3>
+                <p id="profile-details">UID · Department · Email</p>
+            </div>
+            <div class="profile-actions">
+                <button type="button" class="btn btn-sm btn-secondary" id="btn-clear-student-filter">Clear filter (Show all)</button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-tabs" role="tablist">
+                <button type="button" class="tab-btn active" data-loan-filter="ALL" role="tab" aria-selected="true">All Loans</button>
+                <button type="button" class="tab-btn" data-loan-filter="ACTIVE" role="tab" aria-selected="false">Active Loans</button>
+                <button type="button" class="tab-btn" data-loan-filter="OVERDUE" role="tab" aria-selected="false">Overdue Only</button>
+                <button type="button" class="tab-btn" data-loan-filter="RETURNED" role="tab" aria-selected="false">Returned History</button>
+            </div>
+            <div class="filter-controls">
+                <label for="history-student" class="sr-only">Filter by student</label>
+                <select id="history-student" aria-label="Filter loans by student">
+                    <option value="">All Students</option>
+                </select>
+            </div>
+        </div>
+
+        <article class="panel">
+            <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="loans-caption">
+                <table id="loans-table">
+                    <caption id="loans-caption" class="sr-only">Circulation and Loans Ledger</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Book</th>
+                            <th scope="col">Student</th>
+                            <th scope="col">Dates</th>
+                            <th scope="col">Status & Fine</th>
+                            <th scope="col" class="th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loan-rows"></tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <!-- 5. REPORTS & EXPORTS VIEW -->
+    <section id="reports" hidden>
+        <div class="view-header">
+            <div>
+                <h1>Reports & Data Export</h1>
+                <p class="policy">Download current ledger snapshots as CSV spreadsheets or generate printable audit summaries.</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-secondary" onclick="window.print()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    <span>Print Summary</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="export-cards-grid">
+            <article class="panel export-card">
+                <div class="export-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/></svg>
+                </div>
+                <h3>Book Catalog Export</h3>
+                <p>Complete listing of all books, titles, authors, categories, ISBNs, shelf placements, and availability flags.</p>
+                <a href="/api/export/books.csv" download="library_books.csv" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Download Books CSV</span>
+                </a>
+            </article>
+
+            <article class="panel export-card">
+                <div class="export-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                </div>
+                <h3>Student Borrowers Export</h3>
+                <p>Full directory of registered student borrowers, university UIDs, names, email contacts, and departments.</p>
+                <a href="/api/export/students.csv" download="library_students.csv" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Download Students CSV</span>
+                </a>
+            </article>
+
+            <article class="panel export-card">
+                <div class="export-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <h3>Circulation Ledger Export</h3>
+                <p>Complete historical ledger of all issues, renewals, due dates, return timestamps, and fine receipts.</p>
+                <a href="/api/export/loans.csv" download="library_loans.csv" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Download Circulation CSV</span>
+                </a>
+            </article>
+        </div>
+    </section>
+
+    <!-- Accessible status announcer for screen readers -->
+    <div id="table-status-announcer" class="sr-only" role="status" aria-live="polite"></div>
+
+    <!-- Toast Notification container -->
+    <div id="notice" role="status" aria-live="polite" hidden></div>
+</main>
+
+<!-- DIALOG: Add / Edit Book -->
+<dialog id="book-dialog" closedby="any" aria-labelledby="book-dialog-title">
+    <form id="book-form" method="dialog">
+        <div class="dialog-header">
+            <h2 id="book-dialog-title">Add New Book</h2>
+            <button type="button" class="btn-close" data-close-dialog aria-label="Close dialog">&times;</button>
+        </div>
+        <div class="form-grid">
+            <label class="col-span-2">
+                Book ID <span class="req">*</span>
+                <input name="id" required maxlength="40" placeholder="e.g. B101" autofocus>
+            </label>
+            <label class="col-span-2">
+                Title <span class="req">*</span>
+                <input name="title" required maxlength="150" placeholder="Book title">
+            </label>
+            <label class="col-span-2">
+                Author(s) <span class="req">*</span>
+                <input name="author" required maxlength="150" placeholder="Author name">
+            </label>
+            <label>
+                Category
+                <select name="category">
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Software Engineering">Software Engineering</option>
+                    <option value="AI & Data Science">AI & Data Science</option>
+                    <option value="Systems & Networks">Systems & Networks</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Science & General">Science & General</option>
+                </select>
+            </label>
+            <label>
+                Published Year
+                <input name="publishedYear" type="number" min="1900" max="2100" value="2024">
+            </label>
+            <label>
+                ISBN
+                <input name="isbn" maxlength="30" placeholder="e.g. 978-0134685991">
+            </label>
+            <label>
+                Shelf Location
+                <input name="shelfLocation" maxlength="30" placeholder="e.g. Rack CS-01">
+            </label>
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn btn-secondary" data-close-dialog>Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-book">Save Book</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- DIALOG: Register / Edit Student -->
+<dialog id="student-dialog" closedby="any" aria-labelledby="student-dialog-title">
+    <form id="student-form" method="dialog">
+        <div class="dialog-header">
+            <h2 id="student-dialog-title">Register Student</h2>
+            <button type="button" class="btn-close" data-close-dialog aria-label="Close dialog">&times;</button>
+        </div>
+        <div class="form-grid">
+            <label class="col-span-2">
+                Student UID <span class="req">*</span>
+                <input name="uid" required maxlength="40" placeholder="e.g. 23BCS10014" autofocus>
+            </label>
+            <label class="col-span-2">
+                Full Name <span class="req">*</span>
+                <input name="name" required maxlength="150" placeholder="Student name">
+            </label>
+            <label class="col-span-2">
+                Department
+                <select name="department">
+                    <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Artificial Intelligence & ML">Artificial Intelligence & ML</option>
+                    <option value="Data Science">Data Science</option>
+                    <option value="Electronics & Communication">Electronics & Communication</option>
+                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                </select>
+            </label>
+            <label>
+                Email Address
+                <input name="email" type="email" maxlength="120" placeholder="student@cuchd.in">
+            </label>
+            <label>
+                Phone Number
+                <input name="phone" type="tel" maxlength="25" placeholder="+91 98765 43210">
+            </label>
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn btn-secondary" data-close-dialog>Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-student">Register Student</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- DIALOG: Issue Book -->
+<dialog id="issue-dialog" closedby="any" aria-labelledby="issue-dialog-title">
+    <form id="issue-form" method="dialog">
+        <div class="dialog-header">
+            <h2 id="issue-dialog-title">Issue Book</h2>
+            <button type="button" class="btn-close" data-close-dialog aria-label="Close dialog">&times;</button>
+        </div>
+        <div class="form-grid">
+            <label class="col-span-2">
+                Available Book <span class="req">*</span>
+                <select name="bookId" required autofocus></select>
+            </label>
+            <label class="col-span-2">
+                Borrower (Student) <span class="req">*</span>
+                <select name="studentUid" required></select>
+            </label>
+            <label>
+                Issue Date <span class="req">*</span>
+                <input name="issuedOn" type="date" required>
+            </label>
+            <label>
+                Due Date (Auto 14 days)
+                <input id="issue-preview-due" type="text" readonly value="Calculated automatically" class="input-readonly">
+            </label>
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn btn-secondary" data-close-dialog>Cancel</button>
+            <button type="submit" class="btn btn-primary">Confirm Issue</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- DIALOG: Return Book with Dynamic Live Fine Calculator -->
+<dialog id="return-dialog" closedby="any" aria-labelledby="return-dialog-title">
+    <form id="return-form" method="dialog">
+        <div class="dialog-header">
+            <h2 id="return-dialog-title">Return Book</h2>
+            <button type="button" class="btn-close" data-close-dialog aria-label="Close dialog">&times;</button>
+        </div>
+        <div class="return-details-box">
+            <h3 id="return-book-title">Effective Java</h3>
+            <p id="return-meta" class="text-muted">B101 · Borrower: Jagruthi Julapelli</p>
+            <div class="return-dates-info">
+                <div><span>Issued:</span> <strong id="return-issued-on">-</strong></div>
+                <div><span>Due Date:</span> <strong id="return-due-on">-</strong></div>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <label class="col-span-2">
+                Return Date <span class="req">*</span>
+                <input name="returnedOn" type="date" required id="return-date-input" autofocus>
+            </label>
+        </div>
+
+        <!-- Dynamic Live Fine Preview Box -->
+        <div class="fine-preview-card" id="fine-preview-card">
+            <div class="fine-row">
+                <span>Overdue Duration:</span>
+                <strong id="fine-overdue-days">0 days</strong>
+            </div>
+            <div class="fine-row">
+                <span>Rate:</span>
+                <span>₹5.00 per overdue day</span>
+            </div>
+            <div class="fine-total-row">
+                <span>Total Fine Amount:</span>
+                <strong id="fine-amount-preview">₹0.00</strong>
+            </div>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn btn-secondary" data-close-dialog>Cancel</button>
+            <button type="submit" class="btn btn-primary">Confirm Return</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- DIALOG: Settle / Pay Fine -->
+<dialog id="pay-fine-dialog" closedby="any" aria-labelledby="pay-fine-title">
+    <form id="pay-fine-form" method="dialog">
+        <div class="dialog-header">
+            <h2 id="pay-fine-title">Settle Overdue Fine</h2>
+            <button type="button" class="btn-close" data-close-dialog aria-label="Close dialog">&times;</button>
+        </div>
+        <div class="return-details-box">
+            <h3 id="pay-fine-book-title">Book Title</h3>
+            <p id="pay-fine-student">Student Name</p>
+            <div class="fine-total-row">
+                <span>Outstanding Fine:</span>
+                <strong id="pay-fine-amount">₹0.00</strong>
+            </div>
+        </div>
+        <p class="text-muted">Confirm that the student has paid this overdue fine at the library desk. A receipt record will be updated in the system.</p>
+        <div class="dialog-footer">
+            <button type="button" class="btn btn-secondary" data-close-dialog>Cancel</button>
+            <button type="submit" class="btn btn-primary">Confirm Payment Received</button>
+        </div>
+    </form>
+</dialog>
+
+</body>
+</html>
